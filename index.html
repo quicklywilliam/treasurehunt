@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Treasure Helper</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<script src="./js/prototype.js" type="text/javascript"></script>	
+	<script src="./js/effects.js" type="text/javascript"></script>	
+	<script src="./js/tree.js" type="text/javascript"></script>	
+	<style>
+	body {
+	    background-color: black;
+	    color: #00FF00;
+	}
+	.snow {
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		right: 0px;
+		bottom: 0px;
+		z-index: -1;
+	}
+	input {
+	    background-color: black;
+		border: none;
+	    color: #00FF00;
+	    padding: 15px 10px;
+	    text-align: left;
+	    text-decoration: none;
+	    display: inline-block;
+	    font-size: 16px;
+	}
+	textarea {
+	    background-color: black;
+		border-color: red;
+	    color: #00FF00;
+	    padding: 15px 10px;
+	    text-align: left;
+	    text-decoration: none;
+	    display: inline-block;
+	    font-size: 16px;
+	}
+	</style>
+	<script>
+
+	noteOffset = 60
+	global_count=0
+	audio=new webkitAudioContext()
+
+	function playNote(noteNumber, volume, duration)
+	{
+		frequency=frequencyFromNoteNumber(noteOffset+noteNumber);
+	    var hp=1/frequency/2;
+	    if(duration>hp) duration -= duration % hp;
+	    else duration=hp;
+
+			var g=audio.createGain();
+			var o=audio.createOscillator();
+			o.connect(g);
+			g.connect(audio.destination);
+			o.frequency.value=frequency;
+			g.gain.value=volume;
+			o.noteOn(audio.currentTime + global_count);
+			global_count += duration;
+			o.noteOff(audio.currentTime + global_count);
+			global_count += .01; // between notes
+	}
+	function frequencyFromNoteNumber( note ) {
+		return 440 * Math.pow(2,(note-69)/12);
+	}
+	function playNumbers(){
+	 var notes = document.getElementById("notesTextArea").value;
+	 notes.split(",").forEach(function(note){
+		 playNote(parseInt(note),100,.2);
+		});
+		setTimeout(function (){global_count = 0}, global_count);
+	}
+	
+	function cipher(reverse){
+	 var i = 0;
+   	 var notes = document.getElementById("notesTextArea").value.split(",");
+	 
+	 var cipherText="Cipher Text: "
+	 var letters = document.getElementById("cipherTextArea").value;
+	 letters.split("").forEach(function(letter){
+		 noteInt = parseInt(notes[i]);
+		 playNote(noteInt,100,1);
+		 offset = reverse ? (noteInt * -1) : noteInt;
+		 letterNumber = (letter.toLowerCase().charCodeAt(0) - 97 + offset + 26) % 26; // plus 97 for character table off set, plus 26 to ensure negative numbers are dealt with as expected
+		 
+		 cipherText += String.fromCharCode(letterNumber + 97);
+		 i++;
+		 if (i>=notes.length) {
+			 i = 0;
+		 }
+	});
+		setTimeout(function (){global_count = 0}, global_count);
+		document.getElementById("decipherOutput").textContent = cipherText.toUpperCase();
+	}
+
+	</script>
+</head>
+<div class="snow"></div>
+Notes (ie "-5,0,0,2"):<br/>
+<textarea id="notesTextArea" name="Text1" cols="40" rows="5"></textarea><br/>
+Ciphertext (ie "JIKMAP"):<br/>
+<textarea id="cipherTextArea" name="Text1" cols="40" rows="5"></textarea><br/>
+<input type="button" onclick="cipher(true)" value="Cipher"/>
+<input type="button" onclick="cipher(false)" value="Decipher"/>
+
+<br/>
+<input type="button" onclick="playNumbers()" value="Play Notes"/>
+<p id='decipherOutput'></p>
+<body>
+</body>
+</html>
