@@ -19,6 +19,13 @@
 		bottom: 0px;
 		z-index: -1;
 	}
+	img {
+	    z-index: 3;
+	    position: absolute;
+		top:0px;
+	    width: auto;
+	    height:100%;
+	}
 	input {
 	    background-color: black;
 		border: none;
@@ -69,6 +76,9 @@
 	}
 	function playNumbers(){
 	 var notes = document.getElementById("notesTextArea").value;
+	 if (notes.length == 0) {
+		 return;
+	 }
 	 notes.split(",").forEach(function(note){
 		 playNote(parseInt(note),100,.2);
 		});
@@ -82,6 +92,11 @@
 	 var cipherText="Cipher Text: "
 	 var letters = document.getElementById("cipherTextArea").value;
 	 letters.split("").forEach(function(letter){
+		 if (letter == " " || letter == "-") {
+			 cipherText += letter;
+			 return
+		 }
+		 
 		 noteInt = parseInt(notes[i]);
 		 playNote(noteInt,100,1);
 		 offset = reverse ? (noteInt * -1) : noteInt;
@@ -96,20 +111,53 @@
 		setTimeout(function (){global_count = 0}, global_count);
 		document.getElementById("decipherOutput").textContent = cipherText.toUpperCase();
 	}
+	
+	keys = [70,82,69,65,75]
+	keyIndex=0
+	
+	function doc_keyUp(e) {		
+	    if (e.ctrlKey && e.keyCode == keys[keyIndex]) {
+			console.log(e.keyCode);
+			
+			keyIndex+=1;
+			if (keyIndex >= keys.length) {
+				incrementGif()
+				keyIndex = 0;
+			}
+	    } else if (e.altKey && e.keyCode == 70) {
+			playNumbers();
+	    } else {
+	    	keyIndex = 0;
+	    }
+	}
+	
+	gifIndex=1;
+	function incrementGif() {
+		$("upstairs").show();
+		$("upstairs").src = "./img/gifs/" + gifIndex + ".gif"
+		gifIndex++;
+		if (gifIndex > 4) {
+			gifIndex = 1;
+		}
+		setTimeout(incrementGif, 2000);
+	}
+	
+
+	document.addEventListener('keyup', doc_keyUp, false);
 
 	</script>
 </head>
 <div class="snow"></div>
-Notes (ie "-5,0,0,2"):<br/>
+The notes (-5,0,0,0,2,…):<br/>
 <textarea id="notesTextArea" name="Text1" cols="40" rows="5"></textarea><br/>
-Ciphertext (ie "JIKMAP"):<br/>
+The code:<br/>
 <textarea id="cipherTextArea" name="Text1" cols="40" rows="5"></textarea><br/>
 <input type="button" onclick="cipher(true)" value="Cipher"/>
 <input type="button" onclick="cipher(false)" value="Decipher"/>
 
 <br/>
-<input type="button" onclick="playNumbers()" value="Play Notes"/>
 <p id='decipherOutput'></p>
+<img id="upstairs" src="./img/gifs/1.gif" style="display: none;"/>
 <body>
 </body>
 </html>

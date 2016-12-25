@@ -66,13 +66,3 @@ if (ie4up||ns6up) {
 		}, hidesnowtime*1000);
 	}
 }
-
-
-function fixTreeSize() {
-	var offset = (window.innerWidth-650)/20;
-	document.getElementById('illus').style.height = Math.max(650, 650+offset)+"px";
-	document.getElementById('tree').style.bottom = Math.max(60, 60+offset)+"px";
-	doc_height = Math.max(650, 650+offset);
-}
-
-window.onresize = fixTreeSize;
